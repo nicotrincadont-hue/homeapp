@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text } from 'react-native';
 import { useAuthStore } from '../stores/authStore';
-import { supabase } from '../lib/supabase';
-import { LoginScreen } from '../screens/auth/LoginScreen';
-import { SignUpScreen } from '../screens/auth/SignUpScreen';
+import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { HouseholdScreen } from '../screens/auth/HouseholdScreen';
 import { ExpensesScreen } from '../screens/ExpensesScreen';
 import { AddExpenseScreen } from '../screens/AddExpenseScreen';
@@ -38,103 +37,64 @@ function MainTabs() {
       <Tab.Screen
         name="Expenses"
         component={ExpensesScreen}
-        options={{
-          tabBarIcon: () => <Text style={{ fontSize: 22 }}>💸</Text>,
-          tabBarLabel: 'Expenses',
-        }}
+        options={{ tabBarIcon: () => <Text style={{ fontSize: 22 }}>💸</Text> }}
       />
       <Tab.Screen
         name="Insights"
         component={InsightsScreen}
-        options={{
-          tabBarIcon: () => <Text style={{ fontSize: 22 }}>📊</Text>,
-          tabBarLabel: 'Insights',
-        }}
+        options={{ tabBarIcon: () => <Text style={{ fontSize: 22 }}>📊</Text> }}
       />
       <Tab.Screen
         name="Shopping"
         component={ShoppingListScreen}
-        options={{
-          tabBarIcon: () => <Text style={{ fontSize: 22 }}>🛒</Text>,
-          tabBarLabel: 'Shopping',
-        }}
+        options={{ tabBarIcon: () => <Text style={{ fontSize: 22 }}>🛒</Text>, tabBarLabel: 'Shopping' }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{
-          tabBarIcon: () => <Text style={{ fontSize: 22 }}>⚙️</Text>,
-          tabBarLabel: 'Settings',
-        }}
+        options={{ tabBarIcon: () => <Text style={{ fontSize: 22 }}>⚙️</Text> }}
       />
     </Tab.Navigator>
   );
 }
 
-function ExpenseStack() {
+function AppStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
-      <Stack.Screen
-        name="AddExpense"
-        component={AddExpenseScreen}
-        options={{ presentation: 'modal' }}
-      />
-      <Stack.Screen
-        name="EditExpense"
-        component={EditExpenseScreen}
-        options={{ presentation: 'modal' }}
-      />
-    </Stack.Navigator>
-  );
-}
-
-function AuthStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} />
+      <Stack.Screen name="AddExpense" component={AddExpenseScreen} options={{ presentation: 'modal' }} />
+      <Stack.Screen name="EditExpense" component={EditExpenseScreen} options={{ presentation: 'modal' }} />
     </Stack.Navigator>
   );
 }
 
 export function AppNavigator() {
-  const { session, profile, setSession, fetchProfile, loading } = useAuthStore();
+  const { userId, household, initialized, initialize } = useAuthStore();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        fetchProfile();
-      } else {
-        useAuthStore.setState({ loading: false });
-      }
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) {
-        fetchProfile();
-      } else {
-        useAuthStore.setState({ loading: false });
-      }
-    });
-    return () => subscription.unsubscribe();
+    initialize();
   }, []);
 
-  if (loading) return null;
+  if (!initialized) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}>
+        <ActivityIndicator size="large" color="#6366f1" />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>
-      {!session ? (
-        <AuthStack />
-      ) : !profile?.household_id ? (
+      {!userId ? (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        </Stack.Navigator>
+      ) : !household ? (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Household" component={HouseholdScreen} />
         </Stack.Navigator>
       ) : (
-        <ExpenseStack />
+        <AppStack />
       )}
     </NavigationContainer>
   );

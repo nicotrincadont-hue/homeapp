@@ -17,7 +17,7 @@ import { Category } from '../types';
 import { CATEGORIES, CATEGORY_CONFIG } from '../constants/categories';
 
 export function AddExpenseScreen({ navigation }: any) {
-  const { household, user } = useAuthStore();
+  const { household, userId } = useAuthStore();
   const { addExpense } = useExpenseStore();
 
   const [amount, setAmount] = useState('');
@@ -32,12 +32,12 @@ export function AddExpenseScreen({ navigation }: any) {
       Alert.alert('Error', 'Please enter a valid amount');
       return;
     }
-    if (!household || !user) return;
+    if (!household || !userId) return;
     setLoading(true);
     try {
       await addExpense({
         household_id: household.id,
-        user_id: user.id,
+        user_id: userId,
         amount: Math.round(dollars * 100),
         category,
         description: description.trim() || null,

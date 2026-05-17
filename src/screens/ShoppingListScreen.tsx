@@ -96,7 +96,7 @@ function ShoppingItemRow({
 }
 
 export function ShoppingListScreen() {
-  const { household, user } = useAuthStore();
+  const { household, userId } = useAuthStore();
   const {
     items,
     loading,
@@ -129,11 +129,11 @@ export function ShoppingListScreen() {
   };
 
   const handleAdd = async () => {
-    if (!newItemName.trim() || !household || !user) return;
+    if (!newItemName.trim() || !household || !userId) return;
     try {
       await addItem({
         household_id: household.id,
-        added_by: user.id,
+        added_by: userId,
         name: newItemName.trim(),
         quantity: newItemQty.trim() || null,
       });

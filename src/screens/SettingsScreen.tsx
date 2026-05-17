@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../stores/authStore';
 
 export function SettingsScreen() {
-  const { profile, household, signOut, updateDisplayName } = useAuthStore();
+  const { profile, household, reset, updateDisplayName } = useAuthStore();
   const [displayName, setDisplayName] = useState(profile?.display_name ?? '');
   const [editingName, setEditingName] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -36,10 +36,10 @@ export function SettingsScreen() {
     }
   };
 
-  const handleSignOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+  const handleReset = () => {
+    Alert.alert('Reset App', 'This will clear your local profile. You can re-enter your name next time you open the app.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: signOut },
+      { text: 'Reset', style: 'destructive', onPress: reset },
     ]);
   };
 
@@ -129,8 +129,8 @@ export function SettingsScreen() {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>App</Text>
-            <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
-              <Text style={styles.signOutText}>Sign Out</Text>
+            <TouchableOpacity style={styles.signOutBtn} onPress={handleReset}>
+              <Text style={styles.signOutText}>Reset App</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
