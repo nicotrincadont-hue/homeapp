@@ -104,13 +104,21 @@ export function AppNavigator() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) fetchProfile();
+      if (session) {
+        fetchProfile();
+      } else {
+        useAuthStore.setState({ loading: false });
+      }
     });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) fetchProfile();
+      if (session) {
+        fetchProfile();
+      } else {
+        useAuthStore.setState({ loading: false });
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
